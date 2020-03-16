@@ -34,7 +34,7 @@ IF(EXISTS ${DEFAULT_OPENCV_TENGINE_SOURCE_PATH})
 ELSE()
 	SET(OCV_TENGINE_FILENAME "${TENGINE_VERSION}.zip")#name2
 	SET(OCV_TENGINE_URL "https://github.com/OAID/Tengine/archive/") #url2
-	SET(tengine_md5sum 9c80d91dc8413911522ec80cde013ae2) #md5sum2
+	SET(tengine_md5sum f790a57b0af647f12a320dac3eb19dba) #md5sum2
 
 	MESSAGE(STATUS "**** TENGINE DOWNLOAD BEGIN ****")
 	ocv_download(FILENAME ${OCV_TENGINE_FILENAME}
