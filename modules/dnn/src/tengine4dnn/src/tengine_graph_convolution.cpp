@@ -34,8 +34,8 @@
 #ifdef HAVE_TENGINE
 
 #include "tengine_c_api.h"
-#include "tengine_c_compat.h"
-#include "tengine_operations.h"
+//#include "tengine_c_compat.h"
+//#include "tengine_operations.h"
 
 namespace cv
 {
