@@ -58,6 +58,10 @@
 #include <opencv2/core/utils/configuration.private.hpp>
 #include <opencv2/core/utils/logger.hpp>
 
+#ifdef HAVE_TENGINE
+#include "tengine_c_api.h"
+#endif
+
 namespace cv {
 namespace dnn {
 CV__DNN_EXPERIMENTAL_NS_BEGIN
@@ -1477,7 +1481,13 @@ struct Net::Impl : public detail::NetImplBase
     {
         CV_TRACE_FUNCTION();
         if (preferableBackend == DNN_BACKEND_OPENCV)
+        {
+#ifdef HAVE_TENGINE
+            initTengineBackend();
+#else
             CV_Assert(preferableTarget == DNN_TARGET_CPU || IS_DNN_OPENCL_TARGET(preferableTarget));
+#endif
+        }
         else if (preferableBackend == DNN_BACKEND_HALIDE)
             initHalideBackend();
         else if (preferableBackend == DNN_BACKEND_INFERENCE_ENGINE_NN_BUILDER_2019)
@@ -1499,7 +1509,41 @@ struct Net::Impl : public detail::NetImplBase
         else
             CV_Error(Error::StsNotImplemented, "Unknown backend identifier");
     }
+#ifdef HAVE_TENGINE
 
+    void initTengineBackend()
+    {
+        CV_TRACE_FUNCTION();
+
+        // Iterator to current layer.
+        MapIdToLayerData::iterator it = layers.begin();
+        // Iterator to base layer for fusion. In example, in case of conv+bn+relu
+        // it'll be a conv layer.
+
+        for (; it != layers.end(); it++)
+        {
+            LayerData &ld = it->second;
+            Ptr<Layer> layerCur = ld.layerInstance;
+
+            if (!strcmp(ld.type.c_str(),"Convolution"))
+            {
+                for (int i = 0, n = ld.inputBlobsWrappers.size(); i < n; ++i)
+                {
+                    if (!ld.inputBlobsWrappers[i].empty())
+                        ld.inputBlobsWrappers[i]->copyToHost();
+                }
+
+                std::vector<Mat> inps(ld.inputBlobs.size());
+                for (int i = 0; i < ld.inputBlobs.size(); ++i)
+                {
+                    inps[i] = *ld.inputBlobs[i];
+                }
+                layerCur->initTengine(inps, ld.outputBlobs);
+
+            }
+        }
+    }
+#endif
     void initHalideBackend()
     {
         CV_TRACE_FUNCTION();
@@ -4452,6 +4496,13 @@ Ptr<BackendNode> Layer::initHalide(const std::vector<Ptr<BackendWrapper> > &)
 {
     CV_Error(Error::StsNotImplemented, "Halide pipeline of " + type +
                                        " layers is not defined.");
+    return Ptr<BackendNode>();
+}
+
+Ptr<BackendNode> Layer::initTengine(InputArrayOfArrays inputs_arr, OutputArrayOfArrays outputs_arr)
+{
+    CV_Error(Error::StsNotImplemented, "Halide pipeline of " + type +
+                                   " layers is not defined.");
     return Ptr<BackendNode>();
 }
 

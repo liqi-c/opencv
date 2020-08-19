@@ -22,10 +22,12 @@
 #         sqfu@openailab.com
 #
 
-SET(TENGINE_COMMIT_VERSION "8a4c58e0e05cd850f4bb0936a330edc86dc0e28c")
+#SET(TENGINE_COMMIT_VERSION "8a4c58e0e05cd850f4bb0936a330edc86dc0e28c")
+SET(TENGINE_COMMIT_VERSION "tengine-lite-opencv")
 SET(OCV_TENGINE_DIR "${OpenCV_BINARY_DIR}/3rdparty/libtengine")
-SET(OCV_TENGINE_SOURCE_PATH "${OCV_TENGINE_DIR}/Tengine-${TENGINE_COMMIT_VERSION}")
-#SET(OCV_TENGINE_SOURCE_PATH "${OCV_TENGINE_DIR}/Tengine")
+#SET(OCV_TENGINE_SOURCE_PATH "${OCV_TENGINE_DIR}/Tengine-${TENGINE_COMMIT_VERSION}")
+SET(OCV_TENGINE_SOURCE_PATH "${OCV_TENGINE_DIR}/Tengine-Lite")
+message("----${OCV_TENGINE_SOURCE_PATH}")
 IF(EXISTS "${OCV_TENGINE_SOURCE_PATH}")
 	MESSAGE(STATUS "Tengine is exist already at: ${OCV_TENGINE_SOURCE_PATH}")
 
@@ -34,7 +36,7 @@ IF(EXISTS "${OCV_TENGINE_SOURCE_PATH}")
 ELSE()
 	SET(OCV_TENGINE_FILENAME "${TENGINE_COMMIT_VERSION}.zip")#name2
 	SET(OCV_TENGINE_URL "https://github.com/OAID/Tengine/archive/") #url2
-	SET(tengine_md5sum f51ca8f3963faeeff3f019a6f6edc206) #md5sum2
+	SET(tengine_md5sum bf3040ca224ffd8aa1fda0259b5879df) #md5sum2
 
 	#MESSAGE(STATUS "**** TENGINE DOWNLOAD BEGIN ****")
 	ocv_download(FILENAME ${OCV_TENGINE_FILENAME}
@@ -62,19 +64,12 @@ ENDIF()
 if(BUILD_TENGINE)
 	SET(HAVE_TENGINE 1)
 
-	# android system
-	if(ANDROID)
-	   if(${ANDROID_ABI} STREQUAL "armeabi-v7a")
-			   SET(CONFIG_ARCH_ARM32 ON)
-	   elseif(${ANDROID_ABI} STREQUAL "arm64-v8a")
-			   SET(CONFIG_ARCH_ARM64 ON)
-	   endif()
-	else()
+	if(NOT ANDROID)
 		# linux system
 		if(CMAKE_SYSTEM_PROCESSOR STREQUAL arm)
-			   SET(CONFIG_ARCH_ARM32 ON)
+			   SET (TENGINE_TOOLCHIN_FLAG "-march=armv7-a -mfloat-abi=softfp -mfpu=neon-vfpv4")
 		elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL aarch64) ## AARCH64
-			   SET(CONFIG_ARCH_ARM64 ON)
+			   SET (TENGINE_TOOLCHIN_FLAG "-march=armv8-a")
 		endif()
 	endif()
 
