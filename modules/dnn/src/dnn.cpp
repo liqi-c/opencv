@@ -1484,9 +1484,8 @@ struct Net::Impl : public detail::NetImplBase
         {
 #ifdef HAVE_TENGINE
             initTengineBackend();
-#else
-            CV_Assert(preferableTarget == DNN_TARGET_CPU || IS_DNN_OPENCL_TARGET(preferableTarget));
 #endif
+            CV_Assert(preferableTarget == DNN_TARGET_CPU || IS_DNN_OPENCL_TARGET(preferableTarget));
         }
         else if (preferableBackend == DNN_BACKEND_HALIDE)
             initHalideBackend();
@@ -1517,8 +1516,6 @@ struct Net::Impl : public detail::NetImplBase
 
         // Iterator to current layer.
         MapIdToLayerData::iterator it = layers.begin();
-        // Iterator to base layer for fusion. In example, in case of conv+bn+relu
-        // it'll be a conv layer.
 
         for (; it != layers.end(); it++)
         {
@@ -1527,11 +1524,11 @@ struct Net::Impl : public detail::NetImplBase
 
             if (!strcmp(ld.type.c_str(),"Convolution"))
             {
-                for (int i = 0, n = ld.inputBlobsWrappers.size(); i < n; ++i)
-                {
-                    if (!ld.inputBlobsWrappers[i].empty())
-                        ld.inputBlobsWrappers[i]->copyToHost();
-                }
+//                for (int i = 0, n = ld.inputBlobsWrappers.size(); i < n; ++i)
+//                {
+//                    if (!ld.inputBlobsWrappers[i].empty())
+//                        ld.inputBlobsWrappers[i]->copyToHost();
+//                }
 
                 std::vector<Mat> inps(ld.inputBlobs.size());
                 for (int i = 0; i < ld.inputBlobs.size(); ++i)
@@ -1539,7 +1536,6 @@ struct Net::Impl : public detail::NetImplBase
                     inps[i] = *ld.inputBlobs[i];
                 }
                 layerCur->initTengine(inps, ld.outputBlobs);
-
             }
         }
     }
@@ -4501,7 +4497,7 @@ Ptr<BackendNode> Layer::initHalide(const std::vector<Ptr<BackendWrapper> > &)
 
 Ptr<BackendNode> Layer::initTengine(InputArrayOfArrays inputs_arr, OutputArrayOfArrays outputs_arr)
 {
-    CV_Error(Error::StsNotImplemented, "Halide pipeline of " + type +
+    CV_Error(Error::StsNotImplemented, "Tengine pipeline of " + type +
                                    " layers is not defined.");
     return Ptr<BackendNode>();
 }
