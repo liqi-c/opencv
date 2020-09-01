@@ -118,10 +118,10 @@ int main(int argc, char** argv)
     float sum_time = 0.0;
     for (int i=0; i < 10 ; i++)
     {
-        if(0 == (i%2)  )
+ //       if(0 == (i%2)  )
             frame = cv::imread(parser.get<String>("input"), 1);
-        else if(1 == (i%2) )
-            frame = cv::imread("/mnt/d/Project/Tengine-D/opencv/opencv_extra/testdata/dnn/dog416.png", 1);
+ //       else if(1 == (i%2) )
+ //           frame = cv::imread("/mnt/d/Project/Tengine-D/opencv/opencv_extra/testdata/dnn/dog416.png", 1);
 
 
         //! [Create a 4D blob from a frame]
